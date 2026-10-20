@@ -38,11 +38,9 @@ class ModelTrainer():
     def evaluate_models(self,X,y,models):
         try:
             X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=42)
-
             report = {}
 
-            for i in range(len(list(models))):
-                model = list(model.values())[i]
+            for model_name,model in models.items():
                 
                 model.fit(X_train,y_train)
 
@@ -54,9 +52,14 @@ class ModelTrainer():
                 
                 test_model_score = accuracy_score(y_test,y_test_pred)
 
-                report[list(model.keys())[i]] = test_model_score
+                report[model_name] = test_model_score
 
-                return report 
+                logging.info(
+                f"{model_name}: "
+                f"train accuracy={train_model_score:.4f}, "
+                f"test accuracy={test_model_score:.4f}")
+
+            return report 
 
         except Exception as e:
             raise CustomException(e,sys)
@@ -79,7 +82,7 @@ class ModelTrainer():
 
             print(model_report)
 
-            best_model_score = max(sorted(model_report.values()))
+            best_model_score = max((model_report.values()))
 
             # To get best model name from dict
 
@@ -103,8 +106,9 @@ class ModelTrainer():
         )-> object:
 
         try:
-            model_param_grid = self.utils.read_yaml_file(self.model_trainer_config.model_config_file_path)[
-                'model_selection']['model'][best_model_name]['search_param_grid']
+            model_param_grid = self.utils.read_yaml_file(
+                self.model_trainer_config.model_config_file_path
+                )['model_selection']['model'][best_model_name]['search_param_grid']
 
             grid_search = GridSearchCV(
                 best_model_object,param_grid=model_param_grid,cv=5,n_jobs=-1,verbose=1
@@ -116,7 +120,7 @@ class ModelTrainer():
 
             print('best params are : ',best_params)
 
-            finetuned_model =best_model_object.set_params(**best_params)
+            finetuned_model =grid_search.best_estimator_
 
             return finetuned_model
 
@@ -131,19 +135,22 @@ class ModelTrainer():
         try:
             logging.info('Splitting training and testing input and target feature')
 
-            X_train,X_test,y_train,y_test = (
-                train_arr[:,:-1],
-                test_arr[:,:-1],
-                train_arr[:,:-1],
-                test_arr[:,:-1]
-            )
+            X_train = train_arr[:,:-1]
+            X_test = test_arr[:,:-1]
+            
+            y_train = train_arr[:,-1]
+            y_test = test_arr[:,-1]
 
             logging.info('Extracting model configuration file path')
 
-            model_report:dict = self.evaluate_models(X=X_train,y=y_train,models=self.models)
+            model_report:dict = self.evaluate_models(
+                X=X_train,
+                y=y_train,
+                models=self.models
+            )
 
             # To get best model score from dict
-            best_model_score = max(sorted(model_report.values()))
+            best_model_score = max(model_report.values())
 
             # To get best model name from dict
             best_model_name = list(model_report.keys())[
@@ -165,8 +172,8 @@ class ModelTrainer():
 
             print(f'best_model_name {best_model_name} and score : {best_model_score}')
 
-            if best_model_score < 0.5:
-                raise Exception('No best model found with an accuracy greater than the threshold 0.6')
+            if best_model_score < self.model_trainer_config.expected_accuracy:
+                raise Exception('No best model found with an accuracy greater than the threshold')
 
             logging.info('Best model found on training and testing dataset')
 
