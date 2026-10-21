@@ -7,7 +7,7 @@ from pathlib import Path
 from src.constant import *
 from src.exception import CustomException
 from src.logger import logging
-from src.utils import MainUtils
+from src.utils.main_utils import MainUtils
 from dataclasses import dataclass # using dataclass , there is no need of constructor defining
 
 @dataclass
@@ -25,7 +25,7 @@ class DataIngestion:
             collection = mongo_client[db_name][collection_name]
             df = pd.DataFrame(list(collection.find()))
             if '_id' in df.columns:
-                df = df.drop(columns = ['_id'],axis = 1)
+                df = df.drop(columns=['_id'])
             df.replace({'na':np.nan},inplace = True)
             return df
         except Exception as e:

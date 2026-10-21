@@ -13,7 +13,7 @@ from sklearn.model_selection import GridSearchCV,train_test_split
 from src.constant import *
 from src.exception import CustomException
 from src.logger import logging
-from src.utils import MainUtils
+from src.utils.main_utils import MainUtils
 from dataclasses import dataclass
 
 @dataclass

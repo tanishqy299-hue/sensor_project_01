@@ -8,6 +8,7 @@ from src.exception import CustomException
 from flask import request
 from src.constant import *
 from src.utils.main_utils import MainUtils 
+from fastapi import Request
 from dataclasses import dataclass
 
 @dataclass
@@ -15,11 +16,11 @@ class PredictionPipelineConfig():
     prediction_output_dirname:str = 'predictions'
     prediction_file_name:str = 'prediction_file.csv'
     model_file_path:str = os.path.join(artifact_folder,'model.pkl')
-    preprocessor_path:str = os.path.join(artifact_folder,'preprocessor.pkl')
+    preprocessor_path:str = os.path.join(artifact_folder,'preprocessor.pickle')
     prediction_file_path:str = os.path.join(prediction_output_dirname,prediction_file_name)
 
 class PredictionPipeline():
-    def __init__(self,request:request):
+    def __init__(self,request:Request):
         self.request = request
         self.utils = MainUtils()
         self.prediction_pipeline_config = PredictionPipelineConfig()
@@ -52,10 +53,10 @@ class PredictionPipeline():
         except Exception as e:
             raise CustomException(e,sys)
 
-    def get_predicted_dataframe(self,input_dataframe_path: pd.DataFrame):
+    def get_predicted_dataframe(self, input_dataframe_path: str):
         try:
             prediction_column_name:str = TARGET_COLUMN
-            input_dataframe = pd.DataFrame = pd.read_csv(input_dataframe_path)
+            input_dataframe = pd.read_csv(input_dataframe_path)
 
             input_dataframe = input_dataframe.drop(columns = 'Unnamed: 0') if 'Unnamed: 0' in input_dataframe.columns else input_dataframe
 

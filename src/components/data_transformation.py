@@ -11,7 +11,7 @@ from sklearn.preprocessing import StandardScaler
 from src.constant import *
 from src.exception import CustomException
 from src.logger import logging
-from src.utils import MainUtils
+from src.utils.main_utils import MainUtils
 from dataclasses import dataclass
 
 @dataclass 
@@ -75,12 +75,10 @@ class DataTransformation:
             )
 
             train_arr = np.column_stack(
-                X_train_scaled,
-                np.array(y_train)
+                (X_train_scaled, np.array(y_train))
             )
             test_arr = np.column_stack(
-                X_test_scaled,
-                np.array(y_test)
+                (X_test_scaled, np.array(y_test))
             )
 
             logging.info("DataTransformation completed successfully")
