@@ -2,7 +2,7 @@ aiofiles
 dill==0.3.5.1
 dnspython==2.2.1
 database-connect==0.1.66
-evidently==0.1.58.dev0
+evidently>=0.4.0
 Flask>=3.1,<4
 httptools==0.5.0
 imblearn==0.0
@@ -16,7 +16,7 @@ python-multipart==0.0.6
 seaborn==0.12.2
 setuptools<81
 types-s3transfer==0.6.0.post4
-uvicorn==0.18.3
+uvicorn>=0.22.0,<1
 watchfiles==0.17.0
 websockets==10.3
 wincertstore==0.2
@@ -25,4 +25,4 @@ neuro-mf==0.0.5
 boto3==1.26.105
 Werkzeug>=3.1,<4
 fastapi
--e .
+# -e .
