@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score
 from xgboost import XGBClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier,GradientBoostingClassifier
-from sklearn.model_selection import GridSearchCV,train_test_split
+from sklearn.model_selection import GridSearchCV
 
 from src.constant import *
 from src.exception import CustomException
@@ -35,9 +35,8 @@ class ModelTrainer():
                 'RandomForestClassifier': RandomForestClassifier()
             }
 
-    def evaluate_models(self,X,y,models):
+    def evaluate_models(self,X_train,X_test,y_train,y_test,models):
         try:
-            X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=42)
             report = {}
 
             for model_name,model in models.items():
@@ -143,36 +142,29 @@ class ModelTrainer():
 
             logging.info('Extracting model configuration file path')
 
-            model_report:dict = self.evaluate_models(
-                X=X_train,
-                y=y_train,
-                models=self.models
+            best_model_name,best_model_object,best_model_score = self.get_best_model(
+                X_train = X_train,
+                X_test = X_test,
+                y_train = y_train,
+                y_test = y_test
             )
 
-            # To get best model score from dict
-            best_model_score = max(model_report.values())
-
-            # To get best model name from dict
-            best_model_name = list(model_report.keys())[
-                list(model_report.values()).index(best_model_score)
-            ]
-
-            best_model = self.models[best_model_name]
+            logging.info(f'Best candidate model: {best_model_name}')
 
             best_model = self.finetune_best_model(
                 best_model_name=best_model_name,
-                best_model_object=best_model,
+                best_model_object=best_model_object,
                 X_train=X_train,
                 y_train=y_train
             )
 
             best_model.fit(X_train,y_train)
             y_pred = best_model.predict(X_test)
-            best_model_score = accuracy_score(y_test,y_pred)
+            final_accuracy = accuracy_score(y_test,y_pred)
 
-            print(f'best_model_name {best_model_name} and score : {best_model_score}')
+            print(f'best_model_name {best_model_name} and score : {final_accuracy}')
 
-            if best_model_score < self.model_trainer_config.expected_accuracy:
+            if final_accuracy < self.model_trainer_config.expected_accuracy:
                 raise Exception('No best model found with an accuracy greater than the threshold')
 
             logging.info('Best model found on training and testing dataset')

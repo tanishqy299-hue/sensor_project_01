@@ -2,7 +2,7 @@
 from setuptools import find_packages,setup
 from typing import List 
 
-hypen_e_dot = '-e.'
+hypen_e_dot = '-e .'
 def get_requirements(file_path:str)->List[str]:
     requirements = []
     with open(file_path) as file_obj:
@@ -18,6 +18,6 @@ setup(
     version = '0.0.1',
     author = 'Tanishq',
     author_email = 'tanishqy299@gmail.com',
-    install_requirements =get_requirements('requirements.txt'),
+    install_requires = get_requirements('requirements.txt'),
     packages = find_packages() 
 )
